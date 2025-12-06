@@ -1,0 +1,452 @@
+# =====================================================
+# GENERATE ALL UNSTRUCTURED DOCUMENTS - SINGLE SCRIPT
+# Creates 30 documents: Medical, Police, Property, Adjuster reports
+# =====================================================
+
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+from snowflake.snowpark.context import get_active_session
+
+session = get_active_session()
+
+print("="*70)
+print("GENERATING ALL UNSTRUCTURED DOCUMENTS")
+print("="*70)
+
+# Query high-value claims by type
+print("\n[1/5] Querying claims by type...")
+
+queries = {
+    'medical': """
+        SELECT c.CLAIM_ID, c.CLAIM_DATE, c.CLAIM_AMOUNT, c.LOSS_DESCRIPTION,
+               c.LOSS_LOCATION_CITY, c.LOSS_LOCATION_ADDRESS, c.CLAIM_TYPE,
+               cu.CUSTOMER_NAME, cu.AGE, cu.GENDER, cu.LOCATION_ADDRESS,
+               cu.LOCATION_CITY, cu.LOCATION_ZIP, p.POLICY_ID
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER cu ON c.CUSTOMER_ID = cu.CUSTOMER_ID
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p ON c.POLICY_ID = p.POLICY_ID
+        WHERE (c.CLAIM_TYPE IN ('Health', 'Auto'))
+            AND c.CLAIM_AMOUNT > 40000 AND c.CLAIM_STATUS = 'Approved'
+        ORDER BY c.CLAIM_AMOUNT DESC LIMIT 10
+    """,
+    'police': """
+        SELECT c.CLAIM_ID, c.CLAIM_DATE, c.CLAIM_AMOUNT, c.LOSS_DESCRIPTION,
+               c.LOSS_LOCATION_CITY, c.LOSS_LOCATION_ADDRESS,
+               cu.CUSTOMER_NAME, cu.AGE, cu.LOCATION_ADDRESS, p.POLICY_ID
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER cu ON c.CUSTOMER_ID = cu.CUSTOMER_ID
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p ON c.POLICY_ID = p.POLICY_ID
+        WHERE c.CLAIM_TYPE = 'Auto' AND c.CLAIM_AMOUNT > 30000
+            AND c.CLAIM_STATUS = 'Approved'
+        ORDER BY c.CLAIM_AMOUNT DESC LIMIT 8
+    """,
+    'property': """
+        SELECT c.CLAIM_ID, c.CLAIM_DATE, c.CLAIM_AMOUNT, c.LOSS_DESCRIPTION,
+               c.LOSS_LOCATION_CITY, c.LOSS_LOCATION_ADDRESS, c.WEATHER_RELATED,
+               cu.CUSTOMER_NAME, cu.LOCATION_ADDRESS, p.POLICY_ID, p.COVERAGE_AMOUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER cu ON c.CUSTOMER_ID = cu.CUSTOMER_ID
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p ON c.POLICY_ID = p.POLICY_ID
+        WHERE c.CLAIM_TYPE = 'Property' AND c.CLAIM_AMOUNT > 50000
+            AND c.CLAIM_STATUS = 'Approved'
+        ORDER BY c.CLAIM_AMOUNT DESC LIMIT 6
+    """,
+    'adjuster': """
+        SELECT c.CLAIM_ID, c.CLAIM_DATE, c.CLAIM_AMOUNT, c.LOSS_DESCRIPTION,
+               c.CLAIM_TYPE, c.ADJUSTER_ID, c.SETTLEMENT_AMOUNT,
+               cu.CUSTOMER_NAME, p.POLICY_ID
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER cu ON c.CUSTOMER_ID = cu.CUSTOMER_ID
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p ON c.POLICY_ID = p.POLICY_ID
+        WHERE c.CLAIM_AMOUNT > 40000 AND c.CLAIM_STATUS = 'Approved'
+        ORDER BY c.CLAIM_AMOUNT DESC LIMIT 6
+    """
+}
+
+claims_data = {}
+for doc_type, query in queries.items():
+    df = session.sql(query).to_pandas()
+    claims_data[doc_type] = df
+    print(f"  ✓ {doc_type.capitalize()}: {len(df)} claims")
+
+# [2/5] Generate documents
+print(f"\n[2/5] Generating documents...")
+
+all_documents = []
+
+# === MEDICAL REPORTS ===
+for idx, claim in claims_data['medical'].iterrows():
+    claim_date = str(claim['CLAIM_DATE'])
+    content = f"""{'='*80}
+MEDICAL EVALUATION REPORT
+{'='*80}
+
+CLAIM INFORMATION
+Claim ID:          {claim['CLAIM_ID']}
+Policy:            {claim['POLICY_ID']}
+Incident Date:     {claim_date}
+Total Charges:     ${claim['CLAIM_AMOUNT']:,.2f}
+
+PATIENT INFORMATION
+Name:              {claim['CUSTOMER_NAME']}
+Age:               {claim['AGE']} years
+Gender:            {claim['GENDER']}
+Address:           {claim['LOCATION_ADDRESS']}, {claim['LOCATION_CITY']}, TX {claim['LOCATION_ZIP']}
+
+FACILITY
+Hospital:          {claim['LOSS_LOCATION_CITY']} Medical Center, Texas
+Examination Date:  {claim_date}
+
+DIAGNOSIS
+ICD-10:            {'S13.4XXA - Cervical spine sprain, initial encounter' if claim['CLAIM_TYPE'] == 'Auto' else 'I21.09 - Acute myocardial infarction'}
+Description:       {'Motor vehicle accident causing cervical and lumbar spine trauma with soft tissue injuries' if claim['CLAIM_TYPE'] == 'Auto' else 'Acute medical emergency requiring immediate intervention and hospitalization'}
+
+TREATMENT PROVIDED
+Emergency Services:     ${claim['CLAIM_AMOUNT'] * 0.25:,.2f}
+Diagnostic Imaging:     ${claim['CLAIM_AMOUNT'] * 0.20:,.2f}
+{'Surgical Procedures' if claim['CLAIM_TYPE'] == 'Health' else 'Physical Therapy'}:      ${claim['CLAIM_AMOUNT'] * 0.30:,.2f}
+Medications:            ${claim['CLAIM_AMOUNT'] * 0.10:,.2f}
+Follow-up Care:         ${claim['CLAIM_AMOUNT'] * 0.15:,.2f}
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on {claim_date}.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. {random.choice(['Sarah Johnson', 'Michael Chen', 'Emily Rodriguez'])}, MD
+Specialty:         {random.choice(['Emergency Medicine', 'Orthopedic Surgery', 'Internal Medicine'])}
+Texas License:     TX-{random.randint(10000, 99999)}
+NPI:               {random.randint(1000000000, 9999999999)}
+Report Date:       {datetime.now().strftime('%Y-%m-%d')}
+
+{'='*80}
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+{'='*80}
+"""
+    
+    all_documents.append({
+        'FILENAME': f"medical_report_{claim['CLAIM_ID']}.txt",
+        'CLAIM_ID': claim['CLAIM_ID'],
+        'DOCUMENT_TYPE': 'Medical Report',
+        'CONTENT': content,
+        'CREATED_DATE': datetime.now()
+    })
+
+print(f"  ✓ Generated {len(claims_data['medical'])} medical reports")
+
+# === POLICE/ACCIDENT REPORTS ===
+for idx, claim in claims_data['police'].iterrows():
+    claim_date = str(claim['CLAIM_DATE'])
+    officer_badge = f"{random.randint(1000, 9999)}"
+    incident_num = f"{datetime.now().year}-{random.randint(100000, 999999)}"
+    
+    content = f"""{'='*80}
+POLICE TRAFFIC ACCIDENT REPORT
+{'='*80}
+
+INCIDENT NUMBER: {incident_num}
+REPORT DATE: {claim_date}
+JURISDICTION: {claim['LOSS_LOCATION_CITY']} Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          {claim['CLAIM_ID']}
+Policy Number:     {claim['POLICY_ID']}
+Claim Amount:      ${claim['CLAIM_AMOUNT']:,.2f}
+
+ACCIDENT INFORMATION
+Date/Time:         {claim_date} {random.randint(0, 23):02d}:{random.randint(0, 59):02d}
+Location:          {claim['LOSS_LOCATION_ADDRESS']}
+                   {claim['LOSS_LOCATION_CITY']}, Texas
+Weather:           {random.choice(['Clear', 'Rain', 'Cloudy', 'Fog'])}
+Road Condition:    {random.choice(['Dry', 'Wet', 'Good'])}
+Light:             {random.choice(['Daylight', 'Dark - Street Lights', 'Dusk'])}
+
+INVOLVED PARTIES
+Driver:            {claim['CUSTOMER_NAME']}
+Age:               {claim['AGE']}
+Address:           {claim['LOCATION_ADDRESS']}
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found {random.choice(['two', 'three'])} vehicles involved in a {random.choice(['rear-end', 'side-impact', 'T-bone', 'head-on'])} collision.
+
+Driver reported {'being rear-ended while stopped at traffic signal' if random.random() > 0.5 else 
+'collision occurred during lane change maneuver on highway'}.
+
+{'Airbags deployed in both vehicles.' if random.random() > 0.5 else 'No airbag deployment noted.'}
+Emergency medical services responded to scene. Injuries reported: {'moderate to severe' if claim['CLAIM_AMOUNT'] > 60000 else 'minor to moderate'}.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at ${claim['CLAIM_AMOUNT'] * 0.7:,.2f}
+Medical treatment costs estimated at ${claim['CLAIM_AMOUNT'] * 0.3:,.2f}
+
+VIOLATIONS/CITATIONS
+{random.choice([
+    'No citations issued at scene - investigation ongoing',
+    'Citation issued for failure to control speed',
+    'Citation issued for following too closely',
+    'Citation issued for unsafe lane change'
+])}
+
+OFFICER INFORMATION
+Officer:           {random.choice(['J. Martinez', 'R. Thompson', 'K. Williams', 'S. Davis'])}
+Badge:             {officer_badge}
+Department:        {claim['LOSS_LOCATION_CITY']} PD
+Report Date:       {datetime.now().strftime('%Y-%m-%d')}
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+{'='*80}
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+{'='*80}
+"""
+    
+    all_documents.append({
+        'FILENAME': f"police_report_{claim['CLAIM_ID']}.txt",
+        'CLAIM_ID': claim['CLAIM_ID'],
+        'DOCUMENT_TYPE': 'Police Report',
+        'CONTENT': content,
+        'CREATED_DATE': datetime.now()
+    })
+
+print(f"  ✓ Generated {len(claims_data['police'])} police reports")
+
+# === PROPERTY DAMAGE ASSESSMENTS ===
+for idx, claim in claims_data['property'].iterrows():
+    claim_date = str(claim['CLAIM_DATE'])
+    inspection_date = (datetime.strptime(claim_date, '%Y-%m-%d') + timedelta(days=random.randint(1, 5))).strftime('%Y-%m-%d')
+    
+    content = f"""{'='*80}
+PROPERTY DAMAGE ASSESSMENT REPORT
+{'='*80}
+
+CLAIM INFORMATION
+Claim Number:      {claim['CLAIM_ID']}
+Policy Number:     {claim['POLICY_ID']}
+Date of Loss:      {claim_date}
+Inspection Date:   {inspection_date}
+Claim Amount:      ${claim['CLAIM_AMOUNT']:,.2f}
+
+PROPERTY INFORMATION
+Owner:             {claim['CUSTOMER_NAME']}
+Property Address:  {claim['LOCATION_ADDRESS']}
+Property Type:     Single Family Residence
+Policy Coverage:   ${claim['COVERAGE_AMOUNT']:,.2f}
+
+LOSS DESCRIPTION
+Cause of Loss:     {claim['LOSS_DESCRIPTION']}
+Weather Related:   {'Yes' if claim['WEATHER_RELATED'] else 'No'}
+
+INSPECTION FINDINGS
+
+EXTERIOR DAMAGE:
+- Roof: {'Severe wind damage, missing shingles, exposed decking in multiple areas' if claim['CLAIM_AMOUNT'] > 100000 else 'Moderate hail damage to shingles, granule loss noted'}
+- Siding: {'Major damage from wind-borne debris, multiple penetrations' if claim['CLAIM_AMOUNT'] > 100000 else 'Minor impact damage, cosmetic in nature'}
+- Windows: {random.choice(['2 windows shattered, 3 cracked', '1 window broken', 'No window damage'])}
+- Gutters: {'Detached and damaged in multiple sections' if random.random() > 0.5 else 'Minor damage noted'}
+
+INTERIOR DAMAGE:
+- Water Intrusion: {'Significant water damage to ceilings, walls, and floors in multiple rooms' if claim['CLAIM_AMOUNT'] > 100000 else 'Moderate water staining in 2 rooms'}
+- Ceiling: {'Collapsed section in living room, water damage throughout' if claim['CLAIM_AMOUNT'] > 150000 else 'Water stains and minor sagging'}
+- Walls: {'Drywall damage, mold concerns in affected areas' if random.random() > 0.5 else 'Water staining, repairs needed'}
+- Flooring: {'Hardwood buckling, carpet water damage' if random.random() > 0.5 else 'Minor water damage'}
+
+STRUCTURAL ASSESSMENT:
+- Foundation: No structural damage observed
+- Framing: {'Inspection recommended for wind-damaged areas' if claim['CLAIM_AMOUNT'] > 100000 else 'Appears intact'}
+- Overall Integrity: {'Significant repairs required' if claim['CLAIM_AMOUNT'] > 100000 else 'Moderate repairs needed'}
+
+ESTIMATED REPAIR COSTS
+Roof Replacement:           ${claim['CLAIM_AMOUNT'] * 0.35:,.2f}
+Interior Repairs:           ${claim['CLAIM_AMOUNT'] * 0.25:,.2f}
+Water Damage Remediation:   ${claim['CLAIM_AMOUNT'] * 0.20:,.2f}
+Exterior Repairs:           ${claim['CLAIM_AMOUNT'] * 0.15:,.2f}
+Additional Costs:           ${claim['CLAIM_AMOUNT'] * 0.05:,.2f}
+TOTAL ESTIMATE:             ${claim['CLAIM_AMOUNT']:,.2f}
+
+RECOMMENDATIONS
+- Immediate tarping of damaged roof sections to prevent further water intrusion
+- Water damage remediation to prevent mold growth
+- Structural engineer evaluation recommended for {'severely damaged areas' if claim['CLAIM_AMOUNT'] > 100000 else 'affected sections'}
+- Full roof replacement required per code requirements
+
+INSPECTOR
+Name:              {random.choice(['James Wilson', 'Maria Santos', 'David Brown', 'Lisa Anderson'])}
+License:           TX Adjuster License #{random.randint(100000, 999999)}
+Company:           Texas Property Adjusters LLC
+Date:              {datetime.now().strftime('%Y-%m-%d')}
+
+{'='*80}
+PROPERTY ASSESSMENT - INSURANCE CLAIM DOCUMENTATION
+{'='*80}
+"""
+    
+    all_documents.append({
+        'FILENAME': f"property_assessment_{claim['CLAIM_ID']}.txt",
+        'CLAIM_ID': claim['CLAIM_ID'],
+        'DOCUMENT_TYPE': 'Property Assessment',
+        'CONTENT': content,
+        'CREATED_DATE': datetime.now()
+    })
+
+print(f"  ✓ Generated {len(claims_data['property'])} property assessments")
+
+# === ADJUSTER INVESTIGATION NOTES ===
+for idx, claim in claims_data['adjuster'].iterrows():
+    claim_date = str(claim['CLAIM_DATE'])
+    
+    content = f"""{'='*80}
+CLAIMS ADJUSTER INVESTIGATION NOTES
+{'='*80}
+
+CLAIM REFERENCE
+Claim ID:          {claim['CLAIM_ID']}
+Policy Number:     {claim['POLICY_ID']}
+Claim Type:        {claim['CLAIM_TYPE']}
+Claimed Amount:    ${claim['CLAIM_AMOUNT']:,.2f}
+Settlement:        ${claim['SETTLEMENT_AMOUNT']:,.2f}
+Adjuster:          {claim['ADJUSTER_ID']}
+
+CLAIMANT
+Name:              {claim['CUSTOMER_NAME']}
+Date of Loss:      {claim_date}
+
+INVESTIGATION SUMMARY
+Date Opened:       {claim_date}
+Initial Contact:   {(datetime.strptime(claim_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')}
+Investigation:     {(datetime.strptime(claim_date, '%Y-%m-%d') + timedelta(days=random.randint(3, 7))).strftime('%Y-%m-%d')}
+
+INITIAL ASSESSMENT
+Reviewed claim documentation and supporting evidence. Claimant reported incident 
+on {claim_date}. Initial investigation indicates {'coverage appears valid under policy terms' if random.random() > 0.3 else 'claim requires additional verification'}.
+
+INVESTIGATION ACTIVITIES COMPLETED:
+✓ Policy coverage verification
+✓ Claimant interview conducted
+✓ {'Medical records reviewed' if claim['CLAIM_TYPE'] in ['Auto', 'Health'] else 'Property inspection completed'}
+✓ {'Police report obtained' if claim['CLAIM_TYPE'] == 'Auto' else 'Documentation verified'}
+✓ {'Independent medical examination arranged' if claim['CLAIM_TYPE'] in ['Auto', 'Health'] else 'Contractor estimates reviewed'}
+✓ Liability assessment completed
+
+COVERAGE ANALYSIS
+Policy Limits:     Adequate for claim amount
+Deductible:        Applied as per policy terms
+Exclusions:        None applicable to this claim
+Sub-limits:        Within policy sub-limits
+
+LIABILITY DETERMINATION
+Based on investigation, {'liability is clear and claimant entitled to benefits' if random.random() > 0.2 else 
+'some questions remain regarding extent of damages'}. 
+{'No evidence of misrepresentation or fraud detected' if random.random() > 0.3 else 'Claim appears legitimate'}.
+
+DAMAGE ASSESSMENT
+{'Medical expenses reviewed and deemed reasonable and necessary' if claim['CLAIM_TYPE'] in ['Auto', 'Health'] else
+'Property damage consistent with reported cause of loss'}. 
+{'Treatment aligned with diagnosed injuries' if claim['CLAIM_TYPE'] in ['Auto', 'Health'] else 
+'Repair estimates from licensed contractors reviewed'}.
+
+SETTLEMENT RECOMMENDATION
+Recommended Settlement: ${claim['SETTLEMENT_AMOUNT']:,.2f}
+Basis: {random.choice([
+    'Full settlement recommended - claim valid and documented',
+    'Settlement reduced due to policy deductible and coverage limits',
+    'Settlement reflects actual cash value per policy terms'
+])}
+
+Reserve Amount: ${claim['CLAIM_AMOUNT'] * 1.1:,.2f}
+(Includes claim amount plus estimated expenses)
+
+SPECIAL NOTES
+- {random.choice(['Claimant cooperative throughout process', 'All documentation provided timely', 'No subrogation opportunities identified'])}
+- {random.choice(['File well documented', 'Recommend approval', 'Fast-track processing recommended'])}
+- Final review completed, ready for authorization
+
+NEXT STEPS
+{'☐ Obtain final authorization from supervisor' if claim['CLAIM_AMOUNT'] > 75000 else '☐ Process payment authorization'}
+☐ Issue settlement payment
+☐ Close claim file
+☐ Send closure letter to claimant
+
+ADJUSTER NOTES
+Investigation completed per company guidelines. All necessary documentation obtained 
+and reviewed. Claim appears valid and settlement amount appropriate. Recommend approval.
+
+{'='*80}
+Adjuster: {claim['ADJUSTER_ID']}
+Date: {datetime.now().strftime('%Y-%m-%d')}
+Status: Investigation Complete - Pending Approval
+{'='*80}
+"""
+    
+    all_documents.append({
+        'FILENAME': f"adjuster_notes_{claim['CLAIM_ID']}.txt",
+        'CLAIM_ID': claim['CLAIM_ID'],
+        'DOCUMENT_TYPE': 'Adjuster Notes',
+        'CONTENT': content,
+        'CREATED_DATE': datetime.now()
+    })
+
+print(f"  ✓ Generated {len(claims_data['adjuster'])} adjuster reports")
+
+# [3/5] Store in table
+print(f"\n[3/5] Storing documents in table...")
+
+session.sql("""
+    CREATE OR REPLACE TABLE INSURANCE_CLAIMS_DB.DATA.UNSTRUCTURED_DOCUMENTS (
+        FILENAME VARCHAR(150),
+        CLAIM_ID VARCHAR(30),
+        DOCUMENT_TYPE VARCHAR(50),
+        CONTENT VARCHAR(16777216),
+        CREATED_DATE TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP()
+    )
+""").collect()
+
+df_docs = pd.DataFrame(all_documents)
+session.create_dataframe(df_docs).write.mode("append").save_as_table("INSURANCE_CLAIMS_DB.DATA.UNSTRUCTURED_DOCUMENTS")
+
+print(f"✓ Stored {len(all_documents)} documents in table")
+
+# [4/5] Verify
+print(f"\n[4/5] Verification...")
+
+summary = session.sql("""
+    SELECT 
+        DOCUMENT_TYPE,
+        COUNT(*) as COUNT
+    FROM INSURANCE_CLAIMS_DB.DATA.UNSTRUCTURED_DOCUMENTS
+    GROUP BY DOCUMENT_TYPE
+    ORDER BY DOCUMENT_TYPE
+""")
+summary.show()
+
+# [5/5] Instructions
+print(f"\n[5/5] Export instructions...")
+print(f"\n{'='*70}")
+print(f"✅ SUCCESS! Generated {len(all_documents)} documents")
+print(f"{'='*70}")
+
+print(f"\n📊 Document Breakdown:")
+print(f"   Medical Reports:        {len(claims_data['medical'])}")
+print(f"   Police Reports:         {len(claims_data['police'])}")
+print(f"   Property Assessments:   {len(claims_data['property'])}")
+print(f"   Adjuster Notes:         {len(claims_data['adjuster'])}")
+print(f"   TOTAL:                  {len(all_documents)}")
+
+print(f"\n📥 TO DOWNLOAD:")
+print(f"\n1. Query the table:")
+print(f"   SELECT * FROM INSURANCE_CLAIMS_DB.DATA.UNSTRUCTURED_DOCUMENTS")
+print(f"\n2. In Snowsight, click Download (⬇) button → Save as CSV")
+print(f"\n3. Extract CONTENT column to create individual .txt files")
+print(f"\n4. Upload files to stage @INSURANCE_CLAIMS_DB.DATA.DOCS")
+
+print(f"\n📄 Sample Document:")
+print("="*70)
+print(all_documents[0]['CONTENT'][:800])
+print("... (document continues) ...")
+print("="*70)

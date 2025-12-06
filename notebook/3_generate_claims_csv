@@ -1,0 +1,462 @@
+# =====================================================
+# GENERATE AND INSERT FACT_CLAIMS - 3,000 ROWS
+# Run this in Snowflake Notebook AFTER loading customers and policies
+# =====================================================
+
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+from snowflake.snowpark.context import get_active_session
+
+# Get Snowflake session
+session = get_active_session()
+
+print("="*60)
+print("GENERATING 3,000 CLAIMS FOR FACT_CLAIMS")
+print("="*60)
+
+# Verify prerequisites
+print("\n[0/4] Verifying prerequisite data exists...")
+customer_count = session.sql("SELECT COUNT(*) as cnt FROM INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER").collect()[0]['CNT']
+policy_count = session.sql("SELECT COUNT(*) as cnt FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY").collect()[0]['CNT']
+
+print(f"✓ Found {customer_count} customers in DIM_CUSTOMER")
+print(f"✓ Found {policy_count} policies in DIM_POLICY")
+
+if customer_count == 0:
+    raise Exception("ERROR: DIM_CUSTOMER table is empty. Please load customers first!")
+if policy_count == 0:
+    raise Exception("ERROR: DIM_POLICY table is empty. Please load policies first!")
+
+# Load data from Snowflake
+print("\n[1/4] Loading customer and policy data from Snowflake...")
+df_customers = session.table("INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER").to_pandas()
+df_policies = session.table("INSURANCE_CLAIMS_DB.DATA.DIM_POLICY").to_pandas()
+print(f"✓ Loaded {len(df_customers)} customers and {len(df_policies)} policies")
+
+# Claim distributions (40% Auto, 30% Health, 20% Property, 10% Life)
+CLAIM_TYPES = [
+    ('Auto', 1200),
+    ('Health', 900),
+    ('Property', 600),
+    ('Life', 300)
+]
+
+# Claim amount ranges by type
+CLAIM_AMOUNTS = {
+    'Auto': (500, 150000),
+    'Health': (1000, 300000),
+    'Property': (2000, 500000),
+    'Life': (50000, 5000000)
+}
+
+# Settlement ratio by claim type
+SETTLEMENT_RATIOS = {
+    'Auto': (0.80, 0.95),
+    'Health': (0.70, 0.90),
+    'Property': (0.75, 0.95),
+    'Life': (0.95, 1.00)
+}
+
+# Claim status distributions
+CLAIM_STATUS_WEIGHTS = {
+    'Approved': 75,
+    'Denied': 10,
+    'Pending': 10,
+    'Under Review': 5
+}
+
+# Adjuster IDs by claim type
+ADJUSTERS = {
+    'Auto': ['ADJ-101', 'ADJ-102', 'ADJ-103', 'ADJ-104', 'ADJ-105', 'ADJ-106'],
+    'Health': ['ADJ-201', 'ADJ-202', 'ADJ-203', 'ADJ-204', 'ADJ-205'],
+    'Property': ['ADJ-301', 'ADJ-302', 'ADJ-303', 'ADJ-304'],
+    'Life': ['ADJ-401', 'ADJ-402', 'ADJ-403']
+}
+
+# Loss descriptions by claim type
+LOSS_DESCRIPTIONS = {
+    'Auto': [
+        'Rear-end collision on {} causing vehicle damage',
+        'Multi-vehicle accident on {} during rush hour',
+        'Side-swipe collision on {}',
+        'Hit-and-run accident on {}',
+        'Intersection collision at {}',
+        'Highway accident on {}',
+        'Parking lot collision at {}',
+        'Vehicle rollover on {}',
+        'Head-on collision on {}',
+        'T-bone collision at {}'
+    ],
+    'Health': [
+        'Emergency surgery at {}',
+        'Extended hospitalization at {}',
+        'Outpatient procedure at {}',
+        'Specialist treatment at {}',
+        'Diagnostic imaging and treatment at {}',
+        'Physical therapy following injury at {}',
+        'Urgent care treatment at {}',
+        'Emergency room visit at {}',
+        'Surgical procedure at {}',
+        'Medical treatment for injuries at {}'
+    ],
+    'Property': [
+        'Wind damage to roof at {}',
+        'Water damage from burst pipe at {}',
+        'Fire damage to structure at {}',
+        'Hail damage to property at {}',
+        'Hurricane-related damage at {}',
+        'Tornado damage to residence at {}',
+        'Flooding damage at {}',
+        'Storm damage at {}',
+        'Vandalism damage at {}',
+        'Lightning strike damage at {}'
+    ],
+    'Life': [
+        'Death benefit claim following accidental death',
+        'Death benefit claim following illness',
+        'Death benefit claim - natural causes',
+        'Death benefit claim following accident',
+        'Death benefit claim - terminal illness',
+        'Death benefit claim following medical emergency',
+        'Death benefit claim - unexpected passing',
+        'Death benefit claim following injury',
+        'Death benefit claim - cancer',
+        'Death benefit claim - cardiac event'
+    ]
+}
+
+# Texas locations by city
+TEXAS_LOCATIONS = {
+    'Houston': [
+        ('Interstate 45 North', 'Harris'),
+        ('Loop 610 West', 'Harris'),
+        ('US Highway 290', 'Harris'),
+        ('Interstate 10 East', 'Harris'),
+        ('Memorial Hermann Hospital', 'Harris'),
+        ('Methodist Hospital', 'Harris'),
+        ('Westheimer Rd', 'Harris'),
+        ('Bay Area Blvd', 'Harris')
+    ],
+    'Dallas': [
+        ('Main St at Commerce St', 'Dallas'),
+        ('Dallas North Tollway', 'Dallas'),
+        ('Interstate 35E', 'Dallas'),
+        ('Central Expressway', 'Dallas'),
+        ('Baylor Scott & White Hospital', 'Dallas'),
+        ('UT Southwestern Medical Center', 'Dallas'),
+        ('Midway Rd', 'Dallas')
+    ],
+    'Austin': [
+        ('MoPac Expressway', 'Travis'),
+        ('Interstate 35', 'Travis'),
+        ('Congress Ave', 'Travis'),
+        ('Lamar Blvd', 'Travis'),
+        ('Dell Seton Medical Center', 'Travis'),
+        ('St Davids Medical Center', 'Travis')
+    ],
+    'San Antonio': [
+        ('Interstate 10', 'Bexar'),
+        ('Loop 410', 'Bexar'),
+        ('Broadway St', 'Bexar'),
+        ('University Hospital', 'Bexar'),
+        ('Methodist Hospital', 'Bexar')
+    ]
+}
+
+def generate_claims_data(customers_df, policies_df, total_claims=3000):
+    """Generate claims data with realistic patterns"""
+    claims = []
+    claim_id = 1
+    
+    # Separate policies by type
+    policies_by_type = {
+        ptype: policies_df[policies_df['POLICY_TYPE'] == ptype].to_dict('records')
+        for ptype in ['Auto', 'Health', 'Property', 'Life']
+    }
+    
+    for claim_type, count in CLAIM_TYPES:
+        type_policies = policies_by_type[claim_type]
+        
+        if not type_policies:
+            print(f"Warning: No {claim_type} policies found")
+            continue
+        
+        for i in range(count):
+            # Select a random policy of this type
+            policy = random.choice(type_policies)
+            customer_id = policy['CUSTOMER_ID']
+            policy_id = policy['POLICY_ID']
+            
+            # Get customer details
+            customer = customers_df[customers_df['CUSTOMER_ID'] == customer_id].iloc[0]
+            
+            # Generate claim date (between policy start and now)
+            # Convert to datetime if it's a date object
+            if isinstance(policy['START_DATE'], str):
+                policy_start = datetime.strptime(policy['START_DATE'], '%Y-%m-%d')
+            else:
+                policy_start = datetime.combine(policy['START_DATE'], datetime.min.time())
+            
+            days_since_start = (datetime.now() - policy_start).days
+            if days_since_start <= 0:
+                days_since_start = 365
+            
+            claim_days_back = random.randint(0, min(days_since_start, 730))  # Max 2 years back
+            claim_date = datetime.now() - timedelta(days=claim_days_back)
+            
+            # Report date (same day or next day)
+            report_delay = random.randint(0, 1)
+            report_date = claim_date + timedelta(days=report_delay)
+            
+            # Claim amount
+            min_amt, max_amt = CLAIM_AMOUNTS[claim_type]
+            claim_amount = round(random.uniform(min_amt, max_amt), 2)
+            
+            # Claim status
+            claim_status = random.choices(
+                list(CLAIM_STATUS_WEIGHTS.keys()),
+                weights=list(CLAIM_STATUS_WEIGHTS.values())
+            )[0]
+            
+            # Settlement amount (only for Approved claims)
+            if claim_status == 'Approved':
+                ratio_min, ratio_max = SETTLEMENT_RATIOS[claim_type]
+                settlement_ratio = random.uniform(ratio_min, ratio_max)
+                settlement_amount = round(claim_amount * settlement_ratio, 2)
+            else:
+                settlement_amount = 0.00
+            
+            # Processing days (based on claim type averages)
+            base_days = {'Auto': 30, 'Health': 50, 'Property': 70, 'Life': 90}
+            processing_days = random.randint(
+                int(base_days[claim_type] * 0.7),
+                int(base_days[claim_type] * 1.3)
+            )
+            
+            # Settlement date (only for Approved claims)
+            if claim_status == 'Approved':
+                settlement_date = (report_date + timedelta(days=processing_days)).strftime('%Y-%m-%d')
+            else:
+                settlement_date = None
+            
+            # Weather related (10% chance for Auto/Property)
+            weather_related = random.random() < 0.10 if claim_type in ['Auto', 'Property'] else False
+            
+            # Catastrophe code (if weather related and recent)
+            catastrophe_code = None
+            if weather_related and claim_days_back < 180:
+                year = claim_date.year
+                cat_num = random.randint(1, 12)
+                catastrophe_code = f'CAT-{year}-{cat_num:03d}'
+            
+            # Loss location
+            customer_city = customer['LOCATION_CITY']
+            customer_county = customer['LOCATION_COUNTY']
+            
+            if claim_type == 'Life':
+                loss_location_address = 'Not Applicable'
+                loss_location_city = customer_city
+                loss_location_county = customer_county
+            else:
+                # Select location based on customer city
+                if customer_city in TEXAS_LOCATIONS:
+                    location, county = random.choice(TEXAS_LOCATIONS[customer_city])
+                else:
+                    location = f'{random.randint(1000, 9999)} Main St'
+                    county = customer_county
+                
+                loss_location_address = location
+                loss_location_city = customer_city
+                loss_location_county = county
+            
+            # Loss description
+            desc_template = random.choice(LOSS_DESCRIPTIONS[claim_type])
+            if claim_type != 'Life':
+                loss_description = desc_template.format(loss_location_address)
+            else:
+                loss_description = desc_template
+            
+            # Adjuster ID
+            adjuster_id = random.choice(ADJUSTERS[claim_type])
+            
+            claim = {
+                'CLAIM_ID': f'CLM-{claim_date.year}-{claim_id:06d}',
+                'POLICY_ID': policy_id,
+                'CUSTOMER_ID': customer_id,
+                'CLAIM_DATE': claim_date.strftime('%Y-%m-%d'),
+                'REPORT_DATE': report_date.strftime('%Y-%m-%d'),
+                'CLAIM_AMOUNT': claim_amount,
+                'SETTLEMENT_AMOUNT': settlement_amount,
+                'CLAIM_STATUS': claim_status,
+                'CLAIM_TYPE': claim_type,
+                'ADJUSTER_ID': adjuster_id,
+                'LOSS_DESCRIPTION': loss_description,
+                'LOSS_LOCATION_CITY': loss_location_city,
+                'LOSS_LOCATION_COUNTY': loss_location_county,
+                'LOSS_LOCATION_ADDRESS': loss_location_address,
+                'WEATHER_RELATED': weather_related,
+                'CATASTROPHE_CODE': catastrophe_code,
+                'SETTLEMENT_DATE': settlement_date,
+                'PROCESSING_DAYS': processing_days if claim_status == 'Approved' else None
+            }
+            
+            claims.append(claim)
+            claim_id += 1
+    
+    return claims
+
+# Generate 3,000 claims
+print("\n[2/4] Generating 3,000 claims...")
+claims = generate_claims_data(df_customers, df_policies, 3000)
+
+# Create DataFrame
+df_claims = pd.DataFrame(claims)
+
+print(f"✓ Generated {len(df_claims)} claim records")
+print(f"\nFirst 5 records:")
+print(df_claims.head())
+
+print(f"\nDistribution by Claim Type:")
+print(df_claims['CLAIM_TYPE'].value_counts().sort_index())
+
+print(f"\nDistribution by Status:")
+print(df_claims['CLAIM_STATUS'].value_counts())
+
+# Convert to Snowpark DataFrame
+print(f"\n[3/4] Converting to Snowpark DataFrame...")
+snowpark_df = session.create_dataframe(df_claims)
+
+# Insert into FACT_CLAIMS table
+print(f"\n[4/4] Inserting into FACT_CLAIMS table...")
+
+try:
+    # Write to table
+    snowpark_df.write.mode("append").save_as_table("INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS")
+    
+    print(f"✓ Successfully inserted {len(df_claims)} rows into FACT_CLAIMS")
+    
+    # Verify insertion
+    result = session.sql("SELECT COUNT(*) as row_count FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS").collect()
+    print(f"\n✓ Verification: FACT_CLAIMS now contains {result[0]['ROW_COUNT']} rows")
+    
+    # Show sample records
+    print(f"\nSample records from FACT_CLAIMS:")
+    sample = session.table("INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS").limit(5)
+    sample.show()
+    
+    # Show distribution summary
+    print(f"\nDistribution by Claim Type (from table):")
+    type_dist = session.sql("""
+        SELECT CLAIM_TYPE, COUNT(*) as CLAIM_COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+        GROUP BY CLAIM_TYPE
+        ORDER BY CLAIM_TYPE
+    """)
+    type_dist.show()
+    
+    print(f"\nDistribution by Status:")
+    status_dist = session.sql("""
+        SELECT CLAIM_STATUS, COUNT(*) as COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+        GROUP BY CLAIM_STATUS
+        ORDER BY COUNT DESC
+    """)
+    status_dist.show()
+    
+    print(f"\nAverage Claim Amount by Type:")
+    avg_claim = session.sql("""
+        SELECT 
+            CLAIM_TYPE,
+            ROUND(AVG(CLAIM_AMOUNT), 2) as AVG_CLAIM_AMOUNT,
+            ROUND(AVG(SETTLEMENT_AMOUNT), 2) as AVG_SETTLEMENT_AMOUNT,
+            ROUND(AVG(SETTLEMENT_AMOUNT) / NULLIF(AVG(CLAIM_AMOUNT), 0) * 100, 1) as AVG_SETTLEMENT_RATIO_PCT
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+        WHERE CLAIM_STATUS = 'Approved'
+        GROUP BY CLAIM_TYPE
+        ORDER BY CLAIM_TYPE
+    """)
+    avg_claim.show()
+    
+    print(f"\nTop 5 Cities by Claim Count:")
+    city_claims = session.sql("""
+        SELECT LOSS_LOCATION_CITY, COUNT(*) as CLAIM_COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+        GROUP BY LOSS_LOCATION_CITY
+        ORDER BY CLAIM_COUNT DESC
+        LIMIT 5
+    """)
+    city_claims.show()
+    
+    print(f"\nWeather-Related Claims:")
+    weather_claims = session.sql("""
+        SELECT 
+            WEATHER_RELATED,
+            COUNT(*) as COUNT,
+            ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS), 1) as PERCENTAGE
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+        GROUP BY WEATHER_RELATED
+    """)
+    weather_claims.show()
+    
+    # Verify foreign key relationships
+    print(f"\nVerifying relationships:")
+    fk_check = session.sql("""
+        SELECT 
+            'Claims with valid policies' as CHECK_TYPE,
+            COUNT(*) as COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p ON c.POLICY_ID = p.POLICY_ID
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER cu ON c.CUSTOMER_ID = cu.CUSTOMER_ID
+    """)
+    fk_check.show()
+    
+    # Show high-value claims (these will be linked to documents later)
+    print(f"\nHigh-Value Claims (>$50,000) - Will be linked to unstructured documents:")
+    high_value = session.sql("""
+        SELECT 
+            CLAIM_ID,
+            CLAIM_TYPE,
+            CLAIM_AMOUNT,
+            CLAIM_STATUS,
+            LOSS_LOCATION_CITY
+        FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+        WHERE CLAIM_AMOUNT > 50000
+        ORDER BY CLAIM_AMOUNT DESC
+        LIMIT 10
+    """)
+    high_value.show()
+    
+except Exception as e:
+    print(f"✗ Error inserting data: {str(e)}")
+    raise
+
+print("\n" + "="*60)
+print("CLAIMS DATA LOAD COMPLETE!")
+print("="*60)
+print("\n📊 FINAL DATABASE SUMMARY:")
+
+final_summary = session.sql("""
+    SELECT 
+        'DIM_CLAIM_TYPE' as TABLE_NAME, COUNT(*) as ROW_COUNT 
+    FROM INSURANCE_CLAIMS_DB.DATA.DIM_CLAIM_TYPE
+    UNION ALL
+    SELECT 'DIM_CUSTOMER', COUNT(*) 
+    FROM INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER
+    UNION ALL
+    SELECT 'DIM_POLICY', COUNT(*) 
+    FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY
+    UNION ALL
+    SELECT 'FACT_CLAIMS', COUNT(*) 
+    FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS
+    ORDER BY TABLE_NAME
+""")
+final_summary.show()
+
+print("\n✅ All structured data loaded successfully!")
+print("Next steps:")
+print("  1. Create unstructured documents (medical reports, accident reports)")
+print("  2. Upload documents to SEMANTIC_FILES.DOCUMENTS stage")
+print("  3. Create semantic model YAML file")
+print("  4. Configure Cortex Search service")
+print("  5. Create Snowflake Intelligence agent")

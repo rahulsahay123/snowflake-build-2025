@@ -1,0 +1,239 @@
+# =====================================================
+# GENERATE AND INSERT DIM_POLICY - 1,500 ROWS
+# Run this in Snowflake Notebook AFTER loading customers
+# =====================================================
+
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+from snowflake.snowpark.context import get_active_session
+
+# Get Snowflake session
+session = get_active_session()
+
+print("="*60)
+print("GENERATING 1,500 POLICIES FOR DIM_POLICY")
+print("="*60)
+
+# Verify customers exist
+print("\n[0/4] Verifying DIM_CUSTOMER data exists...")
+customer_count = session.sql("SELECT COUNT(*) as cnt FROM INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER").collect()[0]['CNT']
+print(f"✓ Found {customer_count} customers in DIM_CUSTOMER")
+
+if customer_count == 0:
+    raise Exception("ERROR: DIM_CUSTOMER table is empty. Please load customers first!")
+
+# Load customers from Snowflake
+print("\n[1/4] Loading customer data from Snowflake...")
+df_customers = session.table("INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER").to_pandas()
+print(f"✓ Loaded {len(df_customers)} customers")
+
+# Policy type distributions (40% Auto, 30% Health, 20% Property, 10% Life)
+POLICY_TYPES = [
+    ('Auto', 600),
+    ('Health', 450),
+    ('Property', 300),
+    ('Life', 150)
+]
+
+# Coverage amounts by policy type
+COVERAGE_RANGES = {
+    'Auto': [(100000, 250000), (250000, 500000), (500000, 1000000)],
+    'Health': [(500000, 1000000), (1000000, 2000000), (2000000, 5000000)],
+    'Property': [(250000, 500000), (500000, 1000000), (1000000, 2000000)],
+    'Life': [(500000, 1000000), (1000000, 2000000), (2000000, 5000000)]
+}
+
+# Deductibles by policy type
+DEDUCTIBLES = {
+    'Auto': [500, 750, 1000],
+    'Health': [2500, 3500, 5000],
+    'Property': [2500, 5000, 10000],
+    'Life': [0]
+}
+
+# Underwriter IDs
+UNDERWRITERS = {
+    'Auto': ['UW-101', 'UW-102', 'UW-103', 'UW-104', 'UW-105'],
+    'Health': ['UW-201', 'UW-202', 'UW-203', 'UW-204', 'UW-205'],
+    'Property': ['UW-301', 'UW-302', 'UW-303', 'UW-304', 'UW-305', 'UW-306'],
+    'Life': ['UW-401', 'UW-402', 'UW-403', 'UW-404', 'UW-405']
+}
+
+def calculate_premium(policy_type, coverage_amount, deductible):
+    """Calculate realistic premium based on policy type and coverage"""
+    base_rates = {
+        'Auto': 0.012,      # 1.2% of coverage
+        'Health': 0.010,    # 1.0% of coverage
+        'Property': 0.005,  # 0.5% of coverage
+        'Life': 0.003       # 0.3% of coverage
+    }
+    
+    base_premium = coverage_amount * base_rates[policy_type]
+    
+    # Deductible adjustment (higher deductible = lower premium)
+    if deductible > 0:
+        deductible_factor = 1 - (deductible / coverage_amount) * 0.5
+        base_premium *= deductible_factor
+    
+    # Add some variation (+/- 20%)
+    variation = random.uniform(0.8, 1.2)
+    return round(base_premium * variation, 2)
+
+def generate_policy_data(customers_df, total_policies=1500):
+    """Generate policy data ensuring proper distribution"""
+    policies = []
+    policy_id = 1
+    
+    # Get list of customer IDs
+    customer_ids = customers_df['CUSTOMER_ID'].tolist()
+    
+    # Track policies per customer (max 3 policies per customer)
+    customer_policy_count = {cust_id: 0 for cust_id in customer_ids}
+    
+    for policy_type, count in POLICY_TYPES:
+        for i in range(count):
+            # Select customer (ensuring max 3 policies per customer)
+            available_customers = [cid for cid, pcount in customer_policy_count.items() if pcount < 3]
+            if not available_customers:
+                # Reset if all customers have 3 policies (shouldn't happen with 800 customers)
+                available_customers = customer_ids
+            
+            customer_id = random.choice(available_customers)
+            customer_policy_count[customer_id] += 1
+            
+            # Select coverage amount
+            coverage_range = random.choice(COVERAGE_RANGES[policy_type])
+            coverage_amount = random.randint(coverage_range[0], coverage_range[1])
+            
+            # Select deductible
+            deductible = random.choice(DEDUCTIBLES[policy_type])
+            
+            # Calculate premium
+            premium_amount = calculate_premium(policy_type, coverage_amount, deductible)
+            
+            # Generate policy dates
+            # Start date: between 2017-2022
+            days_back = random.randint(365*3, 365*8)
+            start_date = datetime.now() - timedelta(days=days_back)
+            
+            # End date: 5 years from start for Auto/Health/Property, 30 years for Life
+            years_to_add = 30 if policy_type == 'Life' else 5
+            end_date = start_date + timedelta(days=365*years_to_add)
+            
+            # Policy status (90% Active, 5% Expired, 5% Cancelled)
+            policy_status = random.choices(
+                ['Active', 'Expired', 'Cancelled'],
+                weights=[90, 5, 5]
+            )[0]
+            
+            # Underwriter
+            underwriter_id = random.choice(UNDERWRITERS[policy_type])
+            
+            policy = {
+                'POLICY_ID': f'POL-{policy_type.upper()[:4]}-{policy_id:04d}',
+                'CUSTOMER_ID': customer_id,
+                'POLICY_TYPE': policy_type,
+                'COVERAGE_AMOUNT': coverage_amount,
+                'PREMIUM_AMOUNT': premium_amount,
+                'DEDUCTIBLE': deductible,
+                'START_DATE': start_date.strftime('%Y-%m-%d'),
+                'END_DATE': end_date.strftime('%Y-%m-%d'),
+                'POLICY_STATUS': policy_status,
+                'UNDERWRITER_ID': underwriter_id
+            }
+            
+            policies.append(policy)
+            policy_id += 1
+    
+    return policies
+
+# Generate 1,500 policies
+print("\n[2/4] Generating 1,500 policies...")
+policies = generate_policy_data(df_customers, 1500)
+
+# Create DataFrame
+df_policies = pd.DataFrame(policies)
+
+print(f"✓ Generated {len(df_policies)} policy records")
+print(f"\nFirst 5 records:")
+print(df_policies.head())
+
+print(f"\nDistribution by Policy Type:")
+print(df_policies['POLICY_TYPE'].value_counts().sort_index())
+
+print(f"\nDistribution by Status:")
+print(df_policies['POLICY_STATUS'].value_counts())
+
+# Convert to Snowpark DataFrame
+print(f"\n[3/4] Converting to Snowpark DataFrame...")
+snowpark_df = session.create_dataframe(df_policies)
+
+# Insert into DIM_POLICY table
+print(f"\n[4/4] Inserting into DIM_POLICY table...")
+
+try:
+    # Write to table
+    snowpark_df.write.mode("append").save_as_table("INSURANCE_CLAIMS_DB.DATA.DIM_POLICY")
+    
+    print(f"✓ Successfully inserted {len(df_policies)} rows into DIM_POLICY")
+    
+    # Verify insertion
+    result = session.sql("SELECT COUNT(*) as row_count FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY").collect()
+    print(f"\n✓ Verification: DIM_POLICY now contains {result[0]['ROW_COUNT']} rows")
+    
+    # Show sample records
+    print(f"\nSample records from DIM_POLICY:")
+    sample = session.table("INSURANCE_CLAIMS_DB.DATA.DIM_POLICY").limit(5)
+    sample.show()
+    
+    # Show distribution summary
+    print(f"\nDistribution by Policy Type (from table):")
+    type_dist = session.sql("""
+        SELECT POLICY_TYPE, COUNT(*) as POLICY_COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY
+        GROUP BY POLICY_TYPE
+        ORDER BY POLICY_TYPE
+    """)
+    type_dist.show()
+    
+    print(f"\nDistribution by Status:")
+    status_dist = session.sql("""
+        SELECT POLICY_STATUS, COUNT(*) as COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY
+        GROUP BY POLICY_STATUS
+        ORDER BY COUNT DESC
+    """)
+    status_dist.show()
+    
+    print(f"\nAverage Premium by Policy Type:")
+    avg_premium = session.sql("""
+        SELECT 
+            POLICY_TYPE,
+            ROUND(AVG(PREMIUM_AMOUNT), 2) as AVG_PREMIUM,
+            ROUND(AVG(COVERAGE_AMOUNT), 2) as AVG_COVERAGE
+        FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY
+        GROUP BY POLICY_TYPE
+        ORDER BY POLICY_TYPE
+    """)
+    avg_premium.show()
+    
+    # Verify foreign key relationships
+    print(f"\nVerifying relationships:")
+    fk_check = session.sql("""
+        SELECT 
+            'Policies with valid customers' as CHECK_TYPE,
+            COUNT(*) as COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p
+        INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER c 
+            ON p.CUSTOMER_ID = c.CUSTOMER_ID
+    """)
+    fk_check.show()
+    
+except Exception as e:
+    print(f"✗ Error inserting data: {str(e)}")
+    raise
+
+print("\n" + "="*60)
+print("POLICY DATA LOAD COMPLETE!")
+print("="*60)

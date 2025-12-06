@@ -1,0 +1,207 @@
+# =====================================================
+# GENERATE MEDICAL REPORTS - TABLE-BASED APPROACH
+# Stores reports in Snowflake table, then you download from there
+# NO file system access needed!
+# =====================================================
+
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+from snowflake.snowpark.context import get_active_session
+
+session = get_active_session()
+
+print("="*60)
+print("GENERATING MEDICAL REPORTS (TABLE-BASED)")
+print("="*60)
+
+# Step 1: Query claims
+print("\n[Step 1/4] Querying high-value claims...")
+
+query = """
+    SELECT 
+        c.CLAIM_ID,
+        c.CLAIM_DATE,
+        c.CLAIM_AMOUNT,
+        c.LOSS_DESCRIPTION,
+        c.LOSS_LOCATION_CITY,
+        c.CLAIM_TYPE,
+        cu.CUSTOMER_NAME,
+        cu.AGE,
+        cu.GENDER,
+        cu.LOCATION_ADDRESS,
+        cu.LOCATION_CITY,
+        cu.LOCATION_ZIP,
+        p.POLICY_ID
+    FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+    INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER cu ON c.CUSTOMER_ID = cu.CUSTOMER_ID
+    INNER JOIN INSURANCE_CLAIMS_DB.DATA.DIM_POLICY p ON c.POLICY_ID = p.POLICY_ID
+    WHERE (c.CLAIM_TYPE = 'Health' OR c.CLAIM_TYPE = 'Auto')
+        AND c.CLAIM_AMOUNT > 40000
+        AND c.CLAIM_STATUS = 'Approved'
+    ORDER BY c.CLAIM_AMOUNT DESC
+    LIMIT 10
+"""
+
+df_claims = session.sql(query).to_pandas()
+print(f"✓ Found {len(df_claims)} claims")
+
+# Step 2: Generate reports
+print(f"\n[Step 2/4] Generating reports...")
+
+def generate_report(claim):
+    claim_date = str(claim['CLAIM_DATE']) if not isinstance(claim['CLAIM_DATE'], str) else claim['CLAIM_DATE']
+    
+    return f"""{'='*80}
+MEDICAL EVALUATION REPORT
+{'='*80}
+
+CLAIM INFORMATION
+Claim ID:          {claim['CLAIM_ID']}
+Policy:            {claim['POLICY_ID']}
+Date:              {claim_date}
+Amount:            ${claim['CLAIM_AMOUNT']:,.2f}
+
+PATIENT INFORMATION
+Name:              {claim['CUSTOMER_NAME']}
+Age:               {claim['AGE']} years
+Gender:            {claim['GENDER']}
+Address:           {claim['LOCATION_ADDRESS']}, {claim['LOCATION_CITY']}, TX {claim['LOCATION_ZIP']}
+
+INCIDENT
+Type:              {claim['CLAIM_TYPE']} Claim
+Location:          {claim['LOSS_LOCATION_CITY']}, Texas
+Description:       {claim['LOSS_DESCRIPTION']}
+
+DIAGNOSIS
+{'Motor vehicle accident - cervical/lumbar spine injuries' if claim['CLAIM_TYPE'] == 'Auto' else 'Acute medical condition requiring emergency treatment'}
+
+TREATMENT COST BREAKDOWN
+Emergency:         ${claim['CLAIM_AMOUNT'] * 0.25:,.2f}
+Imaging:           ${claim['CLAIM_AMOUNT'] * 0.20:,.2f}
+Procedures:        ${claim['CLAIM_AMOUNT'] * 0.30:,.2f}
+Medications:       ${claim['CLAIM_AMOUNT'] * 0.10:,.2f}
+Follow-up:         ${claim['CLAIM_AMOUNT'] * 0.15:,.2f}
+TOTAL:             ${claim['CLAIM_AMOUNT']:,.2f}
+
+PROVIDER
+Dr. {'Sarah Johnson' if random.random() > 0.5 else 'Michael Chen'}, MD
+Texas License: TX-{random.randint(10000, 99999)}
+Date: {datetime.now().strftime('%Y-%m-%d')}
+
+{'='*80}
+CONFIDENTIAL - HIPAA PROTECTED
+{'='*80}
+"""
+
+reports = []
+for idx, claim in df_claims.iterrows():
+    reports.append({
+        'FILENAME': f"medical_report_{claim['CLAIM_ID']}.txt",
+        'CLAIM_ID': claim['CLAIM_ID'],
+        'CONTENT': generate_report(claim),
+        'CREATED_DATE': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    print(f"  ✓ Generated: medical_report_{claim['CLAIM_ID']}.txt")
+
+# Step 3: Store in Snowflake table
+print(f"\n[Step 3/4] Storing reports in Snowflake table...")
+
+session.sql("""
+    CREATE OR REPLACE TABLE INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS (
+        FILENAME VARCHAR(100),
+        CLAIM_ID VARCHAR(30),
+        CONTENT VARCHAR(16777216),
+        CREATED_DATE TIMESTAMP_NTZ
+    )
+""").collect()
+
+df_reports = pd.DataFrame(reports)
+session.create_dataframe(df_reports).write.mode("append").save_as_table("INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS")
+
+print(f"✓ Stored {len(reports)} reports in MEDICAL_REPORTS table")
+
+# Step 4: Verify
+print(f"\n[Step 4/4] Verification...")
+
+count = session.sql("SELECT COUNT(*) as CNT FROM INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS").collect()[0]['CNT']
+print(f"✓ Table contains {count} reports")
+
+# Show table preview
+print(f"\n📋 Reports in table:")
+preview = session.sql("""
+    SELECT 
+        FILENAME,
+        CLAIM_ID,
+        LENGTH(CONTENT) as CONTENT_LENGTH,
+        CREATED_DATE
+    FROM INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS
+    ORDER BY FILENAME
+""")
+preview.show()
+
+print(f"\n{'='*60}")
+print(f"✅ SUCCESS! Reports stored in database")
+print(f"{'='*60}")
+
+print(f"\n📥 HOW TO DOWNLOAD REPORTS:")
+print(f"\n**Method 1: Query and Copy/Paste (Quick test)**")
+print(f"Run this SQL in a worksheet:")
+print(f"")
+print(f"SELECT FILENAME, CONTENT")
+print(f"FROM INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS")
+print(f"WHERE FILENAME = 'medical_report_CLM-2024-001234.txt';")
+print(f"")
+print(f"Then copy the CONTENT column value to a text file.")
+
+print(f"\n**Method 2: Export to Stage (Recommended)**")
+print(f"Run this SQL to export all reports to your DOCS stage:")
+print(f"")
+print(f"-- Export each report as a separate file")
+print(f"CREATE OR REPLACE PROCEDURE EXPORT_MEDICAL_REPORTS()")
+print(f"RETURNS STRING")
+print(f"LANGUAGE SQL")
+print(f"AS")
+print(f"$$")
+print(f"DECLARE")
+print(f"  cur CURSOR FOR SELECT FILENAME, CONTENT FROM INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS;")
+print(f"  filename VARCHAR;")
+print(f"  content VARCHAR;")
+print(f"BEGIN")
+print(f"  FOR record IN cur DO")
+print(f"    filename := record.FILENAME;")
+print(f"    content := record.CONTENT;")
+print(f"    ")
+print(f"    -- Create temp table")
+print(f"    CREATE OR REPLACE TEMPORARY TABLE temp_export AS")
+print(f"    SELECT content as REPORT_CONTENT;")
+print(f"    ")
+print(f"    -- Export to stage")
+print(f"    COPY INTO @INSURANCE_CLAIMS_DB.DATA.DOCS/:filename")
+print(f"    FROM temp_export")
+print(f"    FILE_FORMAT = (TYPE='CSV' COMPRESSION='NONE' FIELD_OPTIONALLY_ENCLOSED_BY='NONE')")
+print(f"    SINGLE = TRUE")
+print(f"    HEADER = FALSE")
+print(f"    OVERWRITE = TRUE;")
+print(f"  END FOR;")
+print(f"  RETURN 'Exported all reports';")
+print(f"END;")
+print(f"$$;")
+print(f"")
+print(f"-- Call the procedure")
+print(f"CALL EXPORT_MEDICAL_REPORTS();")
+
+print(f"\n**Method 3: Download Table as CSV**")
+print(f"1. In Snowsight, query: SELECT * FROM INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS")
+print(f"2. Click download button (⬇) to save as CSV")
+print(f"3. Open CSV and extract CONTENT column to individual files")
+
+# Show sample report
+print(f"\n📄 Sample Report Content:")
+print("="*60)
+print(reports[0]['CONTENT'])
+print("="*60)
+
+print(f"\n✅ All reports are now stored in:")
+print(f"   INSURANCE_CLAIMS_DB.DATA.MEDICAL_REPORTS table")
+print(f"\nUse one of the methods above to download!")

@@ -1,0 +1,183 @@
+# =====================================================
+# GENERATE AND INSERT DIM_CUSTOMER - 800 ROWS
+# Run this in Snowflake Notebook
+# =====================================================
+
+import pandas as pd
+import random
+from datetime import datetime, timedelta
+from snowflake.snowpark.context import get_active_session
+
+# Get Snowflake session
+session = get_active_session()
+
+print("="*60)
+print("GENERATING 800 CUSTOMERS FOR DIM_CUSTOMER")
+print("="*60)
+
+# Define distributions
+CITIES = [
+    ('Houston', 'Harris', 280),  # 35%
+    ('Dallas', 'Dallas', 240),   # 30%
+    ('Austin', 'Travis', 120),   # 15%
+    ('San Antonio', 'Bexar', 96), # 12%
+    ('El Paso', 'El Paso', 16),
+    ('Corpus Christi', 'Nueces', 12),
+    ('Lubbock', 'Lubbock', 12),
+    ('Fort Worth', 'Tarrant', 24)
+]
+
+# First names
+MALE_NAMES = ['James', 'Robert', 'Michael', 'David', 'William', 'Richard', 'Joseph', 'Thomas', 'Christopher', 'Daniel',
+              'Matthew', 'Donald', 'Mark', 'Paul', 'Steven', 'Andrew', 'Kenneth', 'Joshua', 'Kevin', 'Brian',
+              'George', 'Timothy', 'Ronald', 'Edward', 'Jason', 'Jeffrey', 'Ryan', 'Jacob', 'Gary', 'Nicholas',
+              'Eric', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon', 'Benjamin', 'Samuel', 'Raymond']
+
+FEMALE_NAMES = ['Mary', 'Patricia', 'Jennifer', 'Linda', 'Barbara', 'Elizabeth', 'Susan', 'Jessica', 'Sarah', 'Karen',
+                'Lisa', 'Nancy', 'Betty', 'Margaret', 'Sandra', 'Ashley', 'Kimberly', 'Emily', 'Donna', 'Michelle',
+                'Carol', 'Amanda', 'Dorothy', 'Melissa', 'Deborah', 'Stephanie', 'Rebecca', 'Sharon', 'Laura', 'Cynthia',
+                'Kathleen', 'Amy', 'Angela', 'Shirley', 'Anna', 'Brenda', 'Pamela', 'Emma', 'Nicole', 'Helen']
+
+LAST_NAMES = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+              'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+              'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+              'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
+              'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts']
+
+# ZIP codes by city
+ZIP_CODES = {
+    'Houston': ['77002', '77005', '77019', '77025', '77056', '77098', '77024', '77027', '77008', '77030',
+                '77046', '77096', '77063', '77401', '77058', '77059', '77034', '77047', '77072', '77083'],
+    'Dallas': ['75201', '75214', '75225', '75230', '75240', '75248', '75209', '75219', '75206', '75217',
+               '75228', '75234', '75243', '75252', '75205', '75207', '75208', '75210', '75211', '75212'],
+    'Austin': ['78701', '78704', '78731', '78745', '78758', '78702', '78741', '78756', '78759', '78746',
+               '78703', '78705', '78712', '78717', '78721', '78722', '78723', '78724', '78725', '78726'],
+    'San Antonio': ['78205', '78209', '78230', '78251', '78207', '78258', '78228', '78213', '78201', '78202',
+                    '78203', '78204', '78206', '78208', '78210', '78211', '78212', '78214', '78215', '78216'],
+    'El Paso': ['79901', '79902', '79903', '79904', '79905', '79906', '79907', '79911', '79912', '79915'],
+    'Corpus Christi': ['78401', '78404', '78405', '78407', '78408', '78410', '78411', '78412'],
+    'Lubbock': ['79401', '79402', '79403', '79404', '79407', '79410', '79411', '79412'],
+    'Fort Worth': ['76102', '76104', '76105', '76106', '76107', '76109', '76110', '76111']
+}
+
+STREETS = ['Main St', 'Oak Ave', 'Maple Dr', 'Park Blvd', 'Cedar Ln', 'Elm St', 'Pine Rd', 'Washington Ave',
+           'Broadway St', 'River Oaks Blvd', 'Memorial Dr', 'Westheimer Rd', 'University Blvd', 'Highland Ave',
+           'Sunset Blvd', 'Congress Ave', 'Lamar Blvd', 'Commerce St', 'Market St', 'Division St']
+
+RISK_PROFILES = ['Low', 'Medium', 'High']
+
+def generate_customer_data(count=800):
+    """Generate customer data with proper Texas distribution"""
+    customers = []
+    customer_id = 1
+    
+    for city, county, city_count in CITIES:
+        for i in range(city_count):
+            # Determine gender
+            gender = random.choice(['Male', 'Female'])
+            
+            # Select name based on gender
+            first_name = random.choice(MALE_NAMES if gender == 'Male' else FEMALE_NAMES)
+            last_name = random.choice(LAST_NAMES)
+            customer_name = f"{first_name} {last_name}"
+            
+            # Generate age (25-65)
+            age = random.randint(25, 65)
+            
+            # Select ZIP and generate address
+            zip_code = random.choice(ZIP_CODES.get(city, ['78000']))
+            street_number = random.randint(1000, 9999)
+            street = random.choice(STREETS)
+            address = f"{street_number} {street}"
+            
+            # Risk profile (30% Low, 50% Medium, 20% High)
+            risk_profile = random.choices(RISK_PROFILES, weights=[30, 50, 20])[0]
+            
+            # Customer since date (between 2017-2022)
+            days_back = random.randint(365*3, 365*8)  # 3-8 years ago
+            customer_since = (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+            
+            # Coastal property (TRUE only for specific Houston/coastal ZIP codes)
+            coastal = True if zip_code in ['77401', '77058', '77059', '77034'] else False
+            
+            customer = {
+                'CUSTOMER_ID': f'CUST-{customer_id:04d}',
+                'CUSTOMER_NAME': customer_name,
+                'AGE': age,
+                'GENDER': gender,
+                'LOCATION_CITY': city,
+                'LOCATION_COUNTY': county,
+                'LOCATION_ZIP': zip_code,
+                'LOCATION_ADDRESS': address,
+                'RISK_PROFILE': risk_profile,
+                'CUSTOMER_SINCE': customer_since,
+                'COASTAL_PROPERTY': coastal
+            }
+            
+            customers.append(customer)
+            customer_id += 1
+    
+    return customers
+
+# Generate 800 customers
+print("\n[1/3] Generating 800 customers...")
+customers = generate_customer_data(800)
+
+# Create DataFrame
+df_customers = pd.DataFrame(customers)
+
+print(f"✓ Generated {len(df_customers)} customer records")
+print(f"\nFirst 5 records:")
+print(df_customers.head())
+
+print(f"\nDistribution by City:")
+print(df_customers['LOCATION_CITY'].value_counts().sort_values(ascending=False))
+
+# Convert to Snowpark DataFrame
+print(f"\n[2/3] Converting to Snowpark DataFrame...")
+snowpark_df = session.create_dataframe(df_customers)
+
+# Insert into DIM_CUSTOMER table
+print(f"\n[3/3] Inserting into DIM_CUSTOMER table...")
+
+try:
+    # Write to table
+    snowpark_df.write.mode("append").save_as_table("INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER")
+    
+    print(f"✓ Successfully inserted {len(df_customers)} rows into DIM_CUSTOMER")
+    
+    # Verify insertion
+    result = session.sql("SELECT COUNT(*) as row_count FROM INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER").collect()
+    print(f"\n✓ Verification: DIM_CUSTOMER now contains {result[0]['ROW_COUNT']} rows")
+    
+    # Show sample records
+    print(f"\nSample records from DIM_CUSTOMER:")
+    sample = session.table("INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER").limit(5)
+    sample.show()
+    
+    # Show distribution summary
+    print(f"\nDistribution by City (from table):")
+    city_dist = session.sql("""
+        SELECT LOCATION_CITY, COUNT(*) as CUSTOMER_COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER
+        GROUP BY LOCATION_CITY
+        ORDER BY CUSTOMER_COUNT DESC
+    """)
+    city_dist.show()
+    
+    print(f"\nDistribution by Risk Profile:")
+    risk_dist = session.sql("""
+        SELECT RISK_PROFILE, COUNT(*) as COUNT
+        FROM INSURANCE_CLAIMS_DB.DATA.DIM_CUSTOMER
+        GROUP BY RISK_PROFILE
+        ORDER BY RISK_PROFILE
+    """)
+    risk_dist.show()
+    
+except Exception as e:
+    print(f"✗ Error inserting data: {str(e)}")
+    raise
+
+print("\n" + "="*60)
+print("CUSTOMER DATA LOAD COMPLETE!")
+print("="*60)

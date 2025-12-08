@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-806471
+REPORT DATE: 2025-06-01
+JURISDICTION: Dallas Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2025-000248
+Policy Number:     POL-AUTO-0581
+Claim Amount:      $149,458.38
+
+ACCIDENT INFORMATION
+Date/Time:         2025-06-01 22:38
+Location:          Midway Rd
+                   Dallas, Texas
+Weather:           Cloudy
+Road Condition:    Wet
+Light:             Daylight
+
+INVOLVED PARTIES
+Driver:            Jonathan Lewis
+Age:               48
+Address:           7284 Pine Rd
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found three vehicles involved in a side-impact collision.
+
+Driver reported being rear-ended while stopped at traffic signal.
+
+No airbag deployment noted.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,620.87
+Medical treatment costs estimated at $44,837.51
+
+VIOLATIONS/CITATIONS
+Citation issued for following too closely
+
+OFFICER INFORMATION
+Officer:           R. Thompson
+Badge:             2303
+Department:        Dallas PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

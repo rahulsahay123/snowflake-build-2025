@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-649166
+REPORT DATE: 2024-04-25
+JURISDICTION: Austin Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2024-001165
+Policy Number:     POL-AUTO-0354
+Claim Amount:      $149,598.16
+
+ACCIDENT INFORMATION
+Date/Time:         2024-04-25 14:07
+Location:          Congress Ave
+                   Austin, Texas
+Weather:           Rain
+Road Condition:    Wet
+Light:             Daylight
+
+INVOLVED PARTIES
+Driver:            Betty Roberts
+Age:               43
+Address:           9594 Memorial Dr
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found two vehicles involved in a side-impact collision.
+
+Driver reported being rear-ended while stopped at traffic signal.
+
+Airbags deployed in both vehicles.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,718.71
+Medical treatment costs estimated at $44,879.45
+
+VIOLATIONS/CITATIONS
+Citation issued for failure to control speed
+
+OFFICER INFORMATION
+Officer:           J. Martinez
+Badge:             8792
+Department:        Austin PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

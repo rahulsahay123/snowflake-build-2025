@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2025-001897
+Policy:            POL-HEAL-0612
+Incident Date:     2025-07-15
+Total Charges:     $298,258.87
+
+PATIENT INFORMATION
+Name:              Matthew Anderson
+Age:               36 years
+Gender:            Male
+Address:           9062 River Oaks Blvd, Houston, TX 77002
+
+FACILITY
+Hospital:          Houston Medical Center, Texas
+Examination Date:  2025-07-15
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,564.72
+Diagnostic Imaging:     $59,651.77
+Surgical Procedures:      $89,477.66
+Medications:            $29,825.89
+Follow-up Care:         $44,738.83
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2025-07-15.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Michael Chen, MD
+Specialty:         Orthopedic Surgery
+Texas License:     TX-54940
+NPI:               1159745737
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

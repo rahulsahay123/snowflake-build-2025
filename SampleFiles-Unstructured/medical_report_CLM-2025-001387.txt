@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2025-001387
+Policy:            POL-HEAL-0707
+Incident Date:     2025-06-02
+Total Charges:     $297,873.41
+
+PATIENT INFORMATION
+Name:              Christopher Brown
+Age:               25 years
+Gender:            Male
+Address:           1036 Lamar Blvd, Dallas, TX 75206
+
+FACILITY
+Hospital:          Dallas Medical Center, Texas
+Examination Date:  2025-06-02
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,468.35
+Diagnostic Imaging:     $59,574.68
+Surgical Procedures:      $89,362.02
+Medications:            $29,787.34
+Follow-up Care:         $44,681.01
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2025-06-02.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Emily Rodriguez, MD
+Specialty:         Emergency Medicine
+Texas License:     TX-63876
+NPI:               2152579985
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

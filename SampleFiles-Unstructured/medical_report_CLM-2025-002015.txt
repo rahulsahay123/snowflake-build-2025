@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2025-002015
+Policy:            POL-HEAL-1007
+Incident Date:     2025-05-14
+Total Charges:     $299,559.69
+
+PATIENT INFORMATION
+Name:              Emma Gonzalez
+Age:               65 years
+Gender:            Female
+Address:           4628 Park Blvd, Houston, TX 77083
+
+FACILITY
+Hospital:          Houston Medical Center, Texas
+Examination Date:  2025-05-14
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,889.92
+Diagnostic Imaging:     $59,911.94
+Surgical Procedures:      $89,867.91
+Medications:            $29,955.97
+Follow-up Care:         $44,933.95
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2025-05-14.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Michael Chen, MD
+Specialty:         Emergency Medicine
+Texas License:     TX-23069
+NPI:               9429758229
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

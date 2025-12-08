@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2024-001670
+Policy:            POL-HEAL-0801
+Incident Date:     2024-01-04
+Total Charges:     $297,595.35
+
+PATIENT INFORMATION
+Name:              Jennifer Walker
+Age:               59 years
+Gender:            Female
+Address:           8237 Westheimer Rd, Austin, TX 78701
+
+FACILITY
+Hospital:          Austin Medical Center, Texas
+Examination Date:  2024-01-04
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,398.84
+Diagnostic Imaging:     $59,519.07
+Surgical Procedures:      $89,278.60
+Medications:            $29,759.53
+Follow-up Care:         $44,639.30
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2024-01-04.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Sarah Johnson, MD
+Specialty:         Orthopedic Surgery
+Texas License:     TX-34080
+NPI:               7625027738
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

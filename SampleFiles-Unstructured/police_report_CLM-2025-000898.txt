@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-845074
+REPORT DATE: 2025-10-03
+JURISDICTION: Houston Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2025-000898
+Policy Number:     POL-AUTO-0311
+Claim Amount:      $149,876.80
+
+ACCIDENT INFORMATION
+Date/Time:         2025-10-03 20:44
+Location:          Interstate 10 East
+                   Houston, Texas
+Weather:           Rain
+Road Condition:    Good
+Light:             Dusk
+
+INVOLVED PARTIES
+Driver:            Benjamin Lopez
+Age:               58
+Address:           3177 Maple Dr
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found three vehicles involved in a head-on collision.
+
+Driver reported collision occurred during lane change maneuver on highway.
+
+No airbag deployment noted.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,913.76
+Medical treatment costs estimated at $44,963.04
+
+VIOLATIONS/CITATIONS
+Citation issued for failure to control speed
+
+OFFICER INFORMATION
+Officer:           R. Thompson
+Badge:             9881
+Department:        Houston PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

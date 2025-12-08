@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2025-001904
+Policy:            POL-HEAL-0858
+Incident Date:     2025-11-16
+Total Charges:     $295,682.57
+
+PATIENT INFORMATION
+Name:              Sandra Allen
+Age:               48 years
+Gender:            Female
+Address:           5343 Highland Ave, Dallas, TX 75212
+
+FACILITY
+Hospital:          Dallas Medical Center, Texas
+Examination Date:  2025-11-16
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $73,920.64
+Diagnostic Imaging:     $59,136.51
+Surgical Procedures:      $88,704.77
+Medications:            $29,568.26
+Follow-up Care:         $44,352.39
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2025-11-16.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Emily Rodriguez, MD
+Specialty:         Emergency Medicine
+Texas License:     TX-33068
+NPI:               7625442428
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

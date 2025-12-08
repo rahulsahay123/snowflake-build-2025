@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-478781
+REPORT DATE: 2023-12-26
+JURISDICTION: San Antonio Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2023-000866
+Policy Number:     POL-AUTO-0384
+Claim Amount:      $149,873.96
+
+ACCIDENT INFORMATION
+Date/Time:         2023-12-26 16:47
+Location:          Broadway St
+                   San Antonio, Texas
+Weather:           Clear
+Road Condition:    Wet
+Light:             Dusk
+
+INVOLVED PARTIES
+Driver:            Nancy Baker
+Age:               30
+Address:           8488 River Oaks Blvd
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found three vehicles involved in a side-impact collision.
+
+Driver reported being rear-ended while stopped at traffic signal.
+
+Airbags deployed in both vehicles.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,911.77
+Medical treatment costs estimated at $44,962.19
+
+VIOLATIONS/CITATIONS
+No citations issued at scene - investigation ongoing
+
+OFFICER INFORMATION
+Officer:           R. Thompson
+Badge:             8411
+Department:        San Antonio PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

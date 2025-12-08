@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2025-001240
+Policy:            POL-HEAL-0674
+Incident Date:     2025-05-14
+Total Charges:     $295,823.03
+
+PATIENT INFORMATION
+Name:              Jacob Jones
+Age:               27 years
+Gender:            Male
+Address:           7527 Park Blvd, Houston, TX 77098
+
+FACILITY
+Hospital:          Houston Medical Center, Texas
+Examination Date:  2025-05-14
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $73,955.76
+Diagnostic Imaging:     $59,164.61
+Surgical Procedures:      $88,746.91
+Medications:            $29,582.30
+Follow-up Care:         $44,373.45
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2025-05-14.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Michael Chen, MD
+Specialty:         Internal Medicine
+Texas License:     TX-42409
+NPI:               1626823754
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

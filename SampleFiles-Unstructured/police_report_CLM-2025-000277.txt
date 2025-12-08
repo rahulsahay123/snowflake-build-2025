@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-947976
+REPORT DATE: 2025-01-24
+JURISDICTION: Dallas Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2025-000277
+Policy Number:     POL-AUTO-0357
+Claim Amount:      $149,868.85
+
+ACCIDENT INFORMATION
+Date/Time:         2025-01-24 04:28
+Location:          UT Southwestern Medical Center
+                   Dallas, Texas
+Weather:           Clear
+Road Condition:    Dry
+Light:             Dusk
+
+INVOLVED PARTIES
+Driver:            Kathleen Lewis
+Age:               26
+Address:           2924 Congress Ave
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found two vehicles involved in a head-on collision.
+
+Driver reported collision occurred during lane change maneuver on highway.
+
+No airbag deployment noted.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,908.19
+Medical treatment costs estimated at $44,960.65
+
+VIOLATIONS/CITATIONS
+Citation issued for failure to control speed
+
+OFFICER INFORMATION
+Officer:           S. Davis
+Badge:             5826
+Department:        Dallas PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

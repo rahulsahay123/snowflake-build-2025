@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-117131
+REPORT DATE: 2025-10-11
+JURISDICTION: Houston Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2025-000925
+Policy Number:     POL-AUTO-0060
+Claim Amount:      $149,703.88
+
+ACCIDENT INFORMATION
+Date/Time:         2025-10-11 08:39
+Location:          Interstate 10 East
+                   Houston, Texas
+Weather:           Cloudy
+Road Condition:    Good
+Light:             Dark - Street Lights
+
+INVOLVED PARTIES
+Driver:            Anna Rodriguez
+Age:               46
+Address:           2035 River Oaks Blvd
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found three vehicles involved in a head-on collision.
+
+Driver reported being rear-ended while stopped at traffic signal.
+
+No airbag deployment noted.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,792.72
+Medical treatment costs estimated at $44,911.16
+
+VIOLATIONS/CITATIONS
+No citations issued at scene - investigation ongoing
+
+OFFICER INFORMATION
+Officer:           S. Davis
+Badge:             7483
+Department:        Houston PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

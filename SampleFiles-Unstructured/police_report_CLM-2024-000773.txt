@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-465575
+REPORT DATE: 2024-06-02
+JURISDICTION: Houston Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2024-000773
+Policy Number:     POL-AUTO-0189
+Claim Amount:      $148,843.44
+
+ACCIDENT INFORMATION
+Date/Time:         2024-06-02 08:16
+Location:          Interstate 45 North
+                   Houston, Texas
+Weather:           Clear
+Road Condition:    Good
+Light:             Dusk
+
+INVOLVED PARTIES
+Driver:            Jennifer Hill
+Age:               39
+Address:           6501 Washington Ave
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found three vehicles involved in a T-bone collision.
+
+Driver reported being rear-ended while stopped at traffic signal.
+
+Airbags deployed in both vehicles.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,190.41
+Medical treatment costs estimated at $44,653.03
+
+VIOLATIONS/CITATIONS
+No citations issued at scene - investigation ongoing
+
+OFFICER INFORMATION
+Officer:           K. Williams
+Badge:             7386
+Department:        Houston PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

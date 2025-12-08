@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2024-001484
+Policy:            POL-HEAL-1007
+Incident Date:     2024-05-25
+Total Charges:     $297,945.36
+
+PATIENT INFORMATION
+Name:              Emma Gonzalez
+Age:               65 years
+Gender:            Female
+Address:           4628 Park Blvd, Houston, TX 77083
+
+FACILITY
+Hospital:          Houston Medical Center, Texas
+Examination Date:  2024-05-25
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,486.34
+Diagnostic Imaging:     $59,589.07
+Surgical Procedures:      $89,383.61
+Medications:            $29,794.54
+Follow-up Care:         $44,691.80
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2024-05-25.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Sarah Johnson, MD
+Specialty:         Emergency Medicine
+Texas License:     TX-80481
+NPI:               4760561841
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

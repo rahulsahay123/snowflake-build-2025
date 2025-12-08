@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2024-001598
+Policy:            POL-HEAL-0645
+Incident Date:     2024-01-10
+Total Charges:     $298,069.88
+
+PATIENT INFORMATION
+Name:              Stephanie Rivera
+Age:               64 years
+Gender:            Female
+Address:           1825 Lamar Blvd, Austin, TX 78756
+
+FACILITY
+Hospital:          Austin Medical Center, Texas
+Examination Date:  2024-01-10
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,517.47
+Diagnostic Imaging:     $59,613.98
+Surgical Procedures:      $89,420.96
+Medications:            $29,806.99
+Follow-up Care:         $44,710.48
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2024-01-10.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Emily Rodriguez, MD
+Specialty:         Orthopedic Surgery
+Texas License:     TX-78692
+NPI:               3805207671
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

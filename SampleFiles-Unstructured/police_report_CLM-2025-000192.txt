@@ -1,0 +1,58 @@
+================================================================================
+POLICE TRAFFIC ACCIDENT REPORT
+================================================================================
+
+INCIDENT NUMBER: 2025-390610
+REPORT DATE: 2025-05-17
+JURISDICTION: Houston Police Department, Texas
+
+RELATED INSURANCE CLAIM
+Claim ID:          CLM-2025-000192
+Policy Number:     POL-AUTO-0475
+Claim Amount:      $149,827.02
+
+ACCIDENT INFORMATION
+Date/Time:         2025-05-17 04:06
+Location:          Memorial Hermann Hospital
+                   Houston, Texas
+Weather:           Clear
+Road Condition:    Good
+Light:             Dusk
+
+INVOLVED PARTIES
+Driver:            Betty Rivera
+Age:               41
+Address:           5357 Market St
+License Status:    Valid Texas Driver License
+
+NARRATIVE
+Officers responded to a motor vehicle collision at the above location. Upon arrival, 
+found three vehicles involved in a rear-end collision.
+
+Driver reported being rear-ended while stopped at traffic signal.
+
+No airbag deployment noted.
+Emergency medical services responded to scene. Injuries reported: moderate to severe.
+
+ESTIMATED DAMAGES
+Vehicle damage estimated at $104,878.91
+Medical treatment costs estimated at $44,948.11
+
+VIOLATIONS/CITATIONS
+Citation issued for failure to control speed
+
+OFFICER INFORMATION
+Officer:           J. Martinez
+Badge:             4592
+Department:        Houston PD
+Report Date:       2025-11-20
+
+EVIDENCE
+- Scene photographs taken
+- Witness statements obtained
+- Vehicle damage assessment completed
+- Traffic camera footage requested
+
+================================================================================
+OFFICIAL POLICE DOCUMENT - FOR INSURANCE PURPOSES
+================================================================================

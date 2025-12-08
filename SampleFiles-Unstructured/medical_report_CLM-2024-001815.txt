@@ -1,0 +1,45 @@
+================================================================================
+MEDICAL EVALUATION REPORT
+================================================================================
+
+CLAIM INFORMATION
+Claim ID:          CLM-2024-001815
+Policy:            POL-HEAL-0736
+Incident Date:     2024-09-18
+Total Charges:     $298,881.76
+
+PATIENT INFORMATION
+Name:              Jacob Campbell
+Age:               40 years
+Gender:            Male
+Address:           6839 Highland Ave, El Paso, TX 79905
+
+FACILITY
+Hospital:          El Paso Medical Center, Texas
+Examination Date:  2024-09-18
+
+DIAGNOSIS
+ICD-10:            I21.09 - Acute myocardial infarction
+Description:       Acute medical emergency requiring immediate intervention and hospitalization
+
+TREATMENT PROVIDED
+Emergency Services:     $74,720.44
+Diagnostic Imaging:     $59,776.35
+Surgical Procedures:      $89,664.53
+Medications:            $29,888.18
+Follow-up Care:         $44,832.26
+
+MEDICAL NECESSITY STATEMENT
+All treatment was medically necessary and directly related to the incident on 2024-09-18.
+Treatment follows standard care guidelines and is appropriate for diagnosed conditions.
+
+PROVIDER
+Physician:         Dr. Sarah Johnson, MD
+Specialty:         Emergency Medicine
+Texas License:     TX-74429
+NPI:               6604462248
+Report Date:       2025-11-20
+
+================================================================================
+CONFIDENTIAL MEDICAL INFORMATION - HIPAA PROTECTED
+================================================================================

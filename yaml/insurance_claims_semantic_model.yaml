@@ -1,0 +1,382 @@
+name: insurance_claims_semantic_model
+description: >
+  Comprehensive insurance claims data model containing customer demographics, policy details,
+  claim transactions, and claim-type reference data. Enables powerful analytics on claim frequency,
+  settlement ratios, geographic trends, risk profiles, fraud patterns, and adjuster performance.
+  Designed to power natural language questions such as "What is the average settlement ratio for auto claims in Houston?"
+  or "Which customer segments have the highest claim frequency?"
+
+tables:
+  - name: DIM_CLAIM_TYPE
+    base_table:
+      database: INSURANCE_CLAIMS_DB
+      schema: DATA
+      table: DIM_CLAIM_TYPE
+    dimensions:
+      - name: CLAIM_TYPE
+        expr: CLAIM_TYPE
+        description: Type of insurance claim (Auto, Health, Property, Life)
+        synonyms:
+          - claim_category
+          - type_of_claim
+          - insurance_type
+          - policy_type
+          - line_of_business
+        data_type: VARCHAR(20)
+        sample_values:
+          - Auto
+          - Health
+          - Property
+          - Life
+      - name: DESCRIPTION
+        expr: DESCRIPTION
+        description: Full description of the claim type
+        synonyms:
+          - claim_type_description
+          - category_details
+        data_type: VARCHAR(200)
+    primary_key:
+      columns:
+        - CLAIM_TYPE
+
+  - name: DIM_CUSTOMER
+    base_table:
+      database: INSURANCE_CLAIMS_DB
+      schema: DATA
+      table: DIM_CUSTOMER
+    dimensions:
+      - name: CUSTOMER_NAME
+        expr: CUSTOMER_NAME
+        description: Full name of the insured customer
+        synonyms:
+          - insured_name
+          - policyholder
+          - client_name
+          - full_name
+        data_type: VARCHAR(100)
+        sample_values:
+          - James Smith
+          - Patricia Johnson
+          - Michael Williams
+      - name: AGE
+        expr: AGE
+        description: Age of the customer in years
+        synonyms:
+          - customer_age
+          - age_group
+        data_type: INTEGER
+      - name: GENDER
+        expr: GENDER
+        description: Gender of the customer (Male/Female)
+        synonyms:
+          - sex
+          - customer_gender
+        data_type: VARCHAR(10)
+        sample_values:
+          - Male
+          - Female
+      - name: LOCATION_CITY
+        expr: LOCATION_CITY
+        description: City where the customer resides (Texas-focused)
+        synonyms:
+          - city
+          - customer_city
+          - residence_city
+        data_type: VARCHAR(50)
+        sample_values:
+          - Houston
+          - Dallas
+          - Austin
+          - San Antonio
+      - name: LOCATION_COUNTY
+        expr: LOCATION_COUNTY
+        description: County of residence
+        synonyms:
+          - county
+          - customer_county
+        data_type: VARCHAR(50)
+      - name: RISK_PROFILE
+        expr: RISK_PROFILE
+        description: Risk classification of the customer (Low/Medium/High)
+        synonyms:
+          - risk_level
+          - risk_score
+          - customer_risk
+        data_type: VARCHAR(20)
+        sample_values:
+          - Low
+          - Medium
+          - High
+      - name: COASTAL_PROPERTY
+        expr: COASTAL_PROPERTY
+        description: Indicates if customer owns property in coastal/high-risk flood zone
+        synonyms:
+          - coastal_risk
+          - flood_zone
+          - hurricane_exposure
+        data_type: BOOLEAN
+    facts:
+      - name: CUSTOMER_ID
+        expr: CUSTOMER_ID
+        description: Unique identifier for each customer
+        synonyms:
+          - customer_key
+          - client_id
+          - insured_id
+        data_type: VARCHAR(20)
+    primary_key:
+      columns:
+        - CUSTOMER_ID
+
+  - name: DIM_POLICY
+    base_table:
+      database: INSURANCE_CLAIMS_DB
+      schema: DATA
+      table: DIM_POLICY
+    dimensions:
+      - name: POLICY_TYPE
+        expr: POLICY_TYPE
+        description: Type of insurance policy (matches CLAIM_TYPE)
+        synonyms:
+          - coverage_type
+          - insurance_line
+        data_type: VARCHAR(20)
+      - name: POLICY_STATUS
+        expr: POLICY_STATUS
+        description: Current status of the policy
+        synonyms:
+          - status
+          - policy_state
+        data_type: VARCHAR(20)
+        sample_values:
+          - Active
+          - Expired
+          - Cancelled
+      - name: START_DATE
+        expr: START_DATE
+        description: Policy effective date
+        synonyms:
+          - effective_date
+          - coverage_start
+        data_type: DATE
+      - name: END_DATE
+        expr: END_DATE
+        description: Policy expiration date
+        synonyms:
+          - expiration_date
+          - coverage_end
+        data_type: DATE
+    facts:
+      - name: POLICY_ID
+        expr: POLICY_ID
+        description: Unique policy identifier
+        synonyms:
+          - policy_number
+          - contract_id
+        data_type: VARCHAR(30)
+      - name: COVERAGE_AMOUNT
+        expr: COVERAGE_AMOUNT
+        description: Total coverage limit under the policy
+        synonyms:
+          - policy_limit
+          - sum_insured
+          - coverage_limit
+        data_type: DECIMAL(12,2)
+      - name: PREMIUM_AMOUNT
+        expr: PREMIUM_AMOUNT
+        description: Annual or periodic premium paid
+        synonyms:
+          - premium
+          - annual_premium
+        data_type: DECIMAL(10,2)
+      - name: DEDUCTIBLE
+        expr: DEDUCTIBLE
+        description: Policy deductible amount
+        synonyms:
+          - deductible_amount
+          - out_of_pocket
+        data_type: DECIMAL(10,2)
+      - name: CUSTOMER_ID
+        expr: CUSTOMER_ID
+        data_type: VARCHAR(20)
+    primary_key:
+      columns:
+        - POLICY_ID
+
+  - name: FACT_CLAIMS
+    base_table:
+      database: INSURANCE_CLAIMS_DB
+      schema: DATA
+      table: FACT_CLAIMS
+    dimensions:
+      - name: CLAIM_STATUS
+        expr: CLAIM_STATUS
+        description: Current status of the claim
+        synonyms:
+          - status
+          - claim_state
+          - disposition
+        data_type: VARCHAR(30)
+        sample_values:
+          - Approved
+          - Denied
+          - Pending
+          - Under Review
+      - name: CLAIM_TYPE
+        expr: CLAIM_TYPE
+        description: Type of claim filed
+        synonyms:
+          - claim_category
+          - loss_type
+        data_type: VARCHAR(20)
+      - name: LOSS_LOCATION_CITY
+        expr: LOSS_LOCATION_CITY
+        description: City where the loss/incident occurred
+        synonyms:
+          - incident_city
+          - loss_city
+          - accident_location
+        data_type: VARCHAR(50)
+      - name: WEATHER_RELATED
+        expr: WEATHER_RELATED
+        description: Whether the claim was caused by weather (hurricane, hail, flood, etc.)
+        synonyms:
+          - weather_event
+          - storm_related
+          - catastrophe_claim
+        data_type: BOOLEAN
+      - name: ADJUSTER_ID
+        expr: ADJUSTER_ID
+        description: Identifier of the claims adjuster handling the case
+        synonyms:
+          - adjuster
+          - handler
+          - examiner
+        data_type: VARCHAR(20)
+    time_dimensions:
+      - name: CLAIM_DATE
+        expr: CLAIM_DATE
+        description: Date when the claim was reported/filed
+        synonyms:
+          - reported_date
+          - filing_date
+          - incident_reported
+        data_type: DATE
+      - name: REPORT_DATE
+        expr: REPORT_DATE
+        description: Date when loss was first reported to insured (may differ from filing)
+        synonyms:
+          - loss_date
+          - date_of_loss
+          - incident_date
+        data_type: DATE
+      - name: SETTLEMENT_DATE
+        expr: SETTLEMENT_DATE
+        description: Date when claim was settled/paid
+        synonyms:
+          - payment_date
+          - resolution_date
+        data_type: DATE
+    facts:
+      - name: CLAIM_ID
+        expr: CLAIM_ID
+        description: Unique claim identifier
+        synonyms:
+          - claim_number
+          - case_id
+          - reference_number
+        data_type: VARCHAR(30)
+      - name: POLICY_ID
+        expr: POLICY_ID
+        data_type: VARCHAR(30)
+      - name: CUSTOMER_ID
+        expr: CUSTOMER_ID
+        data_type: VARCHAR(20)
+      - name: CLAIM_AMOUNT
+        expr: CLAIM_AMOUNT
+        description: Original amount claimed by policyholder
+        synonyms:
+          - claimed_amount
+          - billed_amount
+          - total_loss
+        data_type: DECIMAL(12,2)
+      - name: SETTLEMENT_AMOUNT
+        expr: SETTLEMENT_AMOUNT
+        description: Final amount paid/approved by insurer
+        synonyms:
+          - paid_amount
+          - approved_amount
+          - settlement_value
+        data_type: DECIMAL(12,2)
+      - name: PROCESSING_DAYS
+        expr: PROCESSING_DAYS
+        description: Number of days from claim filing to resolution
+        synonyms:
+          - cycle_time
+          - days_to_close
+          - processing_time
+        data_type: INTEGER
+    primary_key:
+      columns:
+        - CLAIM_ID
+
+relationships:
+  - name: customer_to_claim
+    join_type: inner
+    relationship_type: many_to_one
+    left_table: FACT_CLAIMS
+    relationship_columns:
+      - left_column: CUSTOMER_ID
+        right_column: CUSTOMER_ID
+    right_table: DIM_CUSTOMER
+
+  - name: policy_to_claim
+    join_type: inner
+    relationship_type: many_to_one
+    left_table: FACT_CLAIMS
+    relationship_columns:
+      - left_column: POLICY_ID
+        right_column: POLICY_ID
+    right_table: DIM_POLICY
+
+  - name: claim_type_dim
+    join_type: inner
+    relationship_type: many_to_one
+    left_table: FACT_CLAIMS
+    relationship_columns:
+      - left_column: CLAIM_TYPE
+        right_column: CLAIM_TYPE
+    right_table: DIM_CLAIM_TYPE
+
+  - name: policy_to_customer
+    join_type: inner
+    relationship_type: many_to_one
+    left_table: DIM_POLICY
+    relationship_columns:
+      - left_column: CUSTOMER_ID
+        right_column: CUSTOMER_ID
+    right_table: DIM_CUSTOMER
+
+verified_queries:
+  - name: Average settlement ratio by claim type and city
+    question: What is the average settlement ratio by claim type in Houston and Dallas over the last 12 months?
+    sql: |
+      SELECT
+        c.CLAIM_TYPE,
+        c.LOSS_LOCATION_CITY,
+        ROUND(AVG(c.SETTLEMENT_AMOUNT / NULLIF(c.CLAIM_AMOUNT, 0)), 4) AS AVG_SETTLEMENT_RATIO,
+        COUNT(*) AS CLAIM_COUNT
+      FROM INSURANCE_CLAIMS_DB.DATA.FACT_CLAIMS c
+      WHERE c.LOSS_LOCATION_CITY IN ('Houston', 'Dallas')
+        AND c.CLAIM_DATE >= DATEADD('MONTH', -12, CURRENT_DATE())
+        AND c.CLAIM_STATUS = 'Approved'
+      GROUP BY c.CLAIM_TYPE, c.LOSS_LOCATION_CITY
+      ORDER BY AVG_SETTLEMENT_RATIO DESC;
+    use_as_onboarding_question: true
+    verified_by: Insurance Claims Agent Build
+    verified_at: 1763750400
+
+custom_instructions: >
+  You are an expert insurance claims analyst. Focus exclusively on claims, policies, customers, and performance metrics.
+  Always use clear business language. When showing ratios, express as percentages when appropriate.
+  Highlight unusual patterns such as high denial rates, long processing times, or geographic concentrations.

@@ -1,0 +1,46 @@
+=======================================================================
+        Live Demo Screenshots – Snowflake Insurance Claims Agent
+=======================================================================
+
+These screenshots were taken LIVE on December 2025 from the actual
+agent running on real structured data (FACT_CLAIMS, DIM_POLICY, etc.)
+and real unstructured .txt reports (police_report_*.txt, medical_report_*.txt,
+property_assessment_*.txt, adjuster_notes_*.txt).
+
+No mock data. No hallucinations. 100% real.
+
+1. demo-screenshot-1.png
+   → Claims Adjuster: “For claim CLM-2025-001590 show claim amount,
+     settlement amount, processing days and quote the exact diagnosis
+     from the medical report.”
+
+2. demo-screenshot-2.png
+   → Claims Manager: “Show settlement ratio and average processing days
+     for all property claims in the last 12 months, then quote the
+     surveyor’s comment on hail vs wear-and-tear from CLM-2024-002286.”
+
+3. demo-screenshot-3.png
+   → Policyholder: “Hi, this is customer for claim CLM-2025-000898.
+     How much has been approved and read me what the police officer
+     wrote about who was at fault.”
+
+4. demo-screenshot-4.png
+   → SIU Investigator: “Find customers with 3 or more claims in the
+     last 2 years and for the top one, quote any mention of
+     ‘pre-existing condition’ from their medical reports.”
+
+5. demo-screenshot-5.png
+   → Actuary: “Calculate ultimate loss ratio for 2025 (settlement +
+     80% of unsettled ÷ premium) and quote the adjuster’s liability
+     opinion from the top 3 largest open claims.”
+
+All prompts use real claim IDs that exist in the FACT_CLAIMS table
+and quote text directly from the uploaded .txt files.
+
+Built & Tested: December 2025
+Author: Rahul Sahay
+Repo: https://github.com/rahulsahay123/snowflake-build-2025
+
+Feel free to use these screenshots in presentations, demos, or share
+with leadership — they are production-ready proof of the agent in action.
+=======================================================================
